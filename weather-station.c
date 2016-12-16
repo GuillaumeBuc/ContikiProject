@@ -57,6 +57,8 @@
 #include "contiki.h"
 #include "dev/leds.h"
 #include "dev/adc-sensors.h"
+#include <math.h>
+
 
 #include <stdio.h>
 #include <string.h>
@@ -72,7 +74,7 @@
 #define PRINTF(...)
 #endif
 
-#define ADC_PIN              5
+#define ADC_PIN              2
 /*---------------------------------------------------------------------------*/
 weather_station_t weather_sensor_values;
 /*---------------------------------------------------------------------------*/
@@ -105,28 +107,23 @@ poll_sensors(void)
   //struct sensors_sensor *sensor;
   weather_sensor_values.counter++;
 
-  /* Poll the weather meter */
   
 
-  /* Poll the temperature and humidity sensor */
-  SENSORS_ACTIVATE(sht25);
-  weather_sensor_values.temperature = sht25.value(SHT25_VAL_TEMP);
-  //weather_sensor_values.humidity = sht25.value(SHT25_VAL_HUM);
-  SENSORS_DEACTIVATE(sht25);
+  /* Poll the temperature  sensor */
+
+  adc_sensors.configure(ANALOG_AAC_SENSOR,2);
+  weather_sensor_values.temperature= adc_sensors.value(ANALOG_AAC_SENSOR);
+  
+  
 
 
 
-  if(weather_sensor_values.temperature == SHT25_ERROR) {
-    PRINTF("WS: *** SHT25 failed, sending zero instead\n");
-    weather_sensor_values.temperature = 0;
-    //weather_sensor_values.humidity = 0;
-  }
+  
 /* récupération de la température ERREUR A LA COMPILATION
 PRINTF(" :%d",sensor->value(ANALOG_AAC_SENSOR));
 weather_sensor_values.temperature=sensor->value(ANALOG_AAC_SENSOR);
 PRINTF("Activate :%d",weather_sensor_values.activate);*/
 
-printf("temperature : %d \n",weather_sensor_values.temperature);
 
  /* PRINTF("WS: Pressure = %u.%u(hPa)\n", (weather_sensor_values.atmospheric_pressure / 10),
                                     (weather_sensor_values.atmospheric_pressure % 10));*/
@@ -179,7 +176,7 @@ interval_post_handler(char *key, int key_len, char *val, int val_len)
 HTTPD_SIMPLE_POST_HANDLER(interval, interval_post_handler);
 /*---------------------------------------------------------------------------*/
 
-//Process pour récupérer la température
+/*Process pour récupérer la température
 PROCESS(temperature_process,"get the temperature");
 AUTOSTART_PROCESSES(&temperature_process);
 
@@ -202,7 +199,7 @@ PROCESS_THREAD(temperature_process,ev,data){
 
  PROCESS_END();
   
-}
+}*/
 
 PROCESS_THREAD(weather_station_process, ev, data)
 {
@@ -227,7 +224,7 @@ PROCESS_THREAD(weather_station_process, ev, data)
   process_start(&httpd_simple_process, NULL);
   
   /*Thread pour la température*/
-  process_start(&temperature_process, NULL);
+  //process_start(&temperature_process, NULL);
 
   /* Read configuration from flash */
   ws_config.interval = WEATHER_STATION_SENSOR_PERIOD;

@@ -47,10 +47,13 @@
 #include "net/ipv6/uip-ds6.h"
 #include "net/ip/uip-udp-packet.h"
 #include "weather-station.h"
+#include "dev/relay.h"
 #include "dev/leds.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdio.h>
+#include "lib/sensors.h"
+#include <math.h>
 
 #include "dev/adc-sensors.h"
 /*---------------------------------------------------------------------------*/
@@ -71,14 +74,25 @@ PROCESS_NAME(weather_station_process);
 PROCESS(udp_client_process, "UDP client process");
 AUTOSTART_PROCESSES(&udp_client_process);
 /*---------------------------------------------------------------------------*/
+
+
 static void
 tcpip_handler(void)
 {
   char *str;
 
+  
   if(uip_newdata()) {
     str = uip_appdata;
     str[uip_datalen()] = '\0';
+    weather_sensor_values.activate=(uint8_t)atoi(str);
+   
+    if (!weather_sensor_values.activate)
+      relay.value(RELAY_ON);
+    else 
+      relay.value(RELAY_OFF);
+     printf("Relay: switch is now --> %u\n", relay.status(SENSORS_ACTIVE));
+
     printf("DATA recv '%s'\n", str);
   }
 }
@@ -130,8 +144,8 @@ PROCESS_THREAD(udp_client_process, ev, data)
   PROCESS_BEGIN();
 
   PROCESS_PAUSE();
-
   set_global_address();
+  SENSORS_ACTIVATE(relay);
  
   PRINTF("UDP client process started\n");
   print_local_addresses();

@@ -54,9 +54,10 @@
 #define WEATHER_STATION_WS_INTERVAL_MAX    600
 /*---------------------------------------------------------------------------*/
 typedef struct weather_station {
-  uint16_t counter;
+  
   uint8_t activate;
   uint16_t temperature;
+  uint16_t counter;
   /*uint16_t humidity;
   uint16_t atmospheric_pressure;
   uint16_t wind_speed;
